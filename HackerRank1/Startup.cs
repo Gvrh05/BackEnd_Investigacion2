@@ -30,6 +30,17 @@ namespace LibraryService.WebAPI
             services.AddDbContext<LibraryContext>(options => options.UseInMemoryDatabase("librarydb"));
             services.AddControllers();
 
+            // Configure CORS policy for development client
+            services.AddCors(options =>
+            {
+                options.AddPolicy("DevCors", policy =>
+                    policy.WithOrigins("http://localhost:5173")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials()
+                );
+            });
+
             // Add Swagger generation
             services.AddSwaggerGen(c =>
             {
@@ -61,6 +72,11 @@ namespace LibraryService.WebAPI
             }
 
             app.UseRouting();
+
+            app.UseCors("DevCors");
+
+            // Agregar los metodos de Auth al middleware pipeline
+            app.UseAuthentication();
 
             app.UseEndpoints(endpoints =>
             {
