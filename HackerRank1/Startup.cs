@@ -58,7 +58,7 @@ namespace LibraryService.WebAPI
             services.AddCors(options =>
             {
                 options.AddPolicy("DevCors", policy =>
-                    policy.WithOrigins("http://localhost:5173")
+                    policy.WithOrigins("https//:backendinvestigacion2-production.up.railway.app")
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials()
@@ -101,6 +101,7 @@ namespace LibraryService.WebAPI
 
             // Agregar los metodos de Auth al middleware pipeline
             app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
