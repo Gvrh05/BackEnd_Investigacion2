@@ -58,7 +58,7 @@ namespace LibraryService.WebAPI
             services.AddCors(options =>
             {
                 options.AddPolicy("DevCors", policy =>
-                    policy.WithOrigins("https://investigacionfrontend.netlify.app/)
+                    policy.WithOrigins("https://investigacionfrontend.netlify.app")
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials()
