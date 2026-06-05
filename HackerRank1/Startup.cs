@@ -7,7 +7,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace LibraryService.WebAPI
 {
@@ -21,16 +27,34 @@ namespace LibraryService.WebAPI
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services) 
         {
-            // Add support for Dependency Injection for internal services (BooksService and LibrariesService)
-            services.AddTransient<ILibrariesService,  LibrariesService>();
-            services.AddTransient<IBooksService,  BooksService>();
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = "MyApp",
+                        ValidAudience = "localhost:80",
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes("mi-clave-secreta-super-segura-1234!"))
+                    };
+                });
+
+            services.AddAuthorization();  
+
+          
+            services.AddTransient<ILibrariesService, LibrariesService>();
+            services.AddTransient<IBooksService, BooksService>();
 
             services.AddDbContext<LibraryContext>(options => options.UseInMemoryDatabase("librarydb"));
             services.AddControllers();
 
-            // Configure CORS policy for development client
+           
             services.AddCors(options =>
             {
                 options.AddPolicy("DevCors", policy =>
@@ -41,7 +65,7 @@ namespace LibraryService.WebAPI
                 );
             });
 
-            // Add Swagger generation
+            // Swagger
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
